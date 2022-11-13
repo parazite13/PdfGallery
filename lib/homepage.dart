@@ -1,11 +1,12 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:path/path.dart' as Path;
+import 'package:path/path.dart' as path;
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdfx/pdfx.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'model.dart';
 import 'pdfviewpage.dart';
@@ -47,7 +48,7 @@ class HomePageState extends State<HomePage> {
     Directory directory;
     if(Platform.isWindows)
     {
-      directory = Directory(Path.join((await getApplicationDocumentsDirectory()).path, "PdfGallery"));
+      directory = Directory(path.join((await getApplicationDocumentsDirectory()).path, "PdfGallery"));
       directory.create();
     }
     else
@@ -159,7 +160,7 @@ class HomePageState extends State<HomePage> {
                               .then((document) => document.getPage(1))
                               .then((page) => page.render(width: page.width / 2, height: page.height / 2)),
                           builder: (context, snapshot) {
-                            if(selectedCategory?.files[itemIndex].bytes == null && snapshot.hasData)
+                            if(selectedCategory?.files[itemIndex].bytes == null && snapshot.connectionState == ConnectionState.done && snapshot.hasData)
                             {
                               selectedCategory?.files[itemIndex].bytes = snapshot.data?.bytes;
                             }
@@ -188,6 +189,12 @@ class HomePageState extends State<HomePage> {
                               child: const Text('Open'),
                               onPressed: () {
                                 Navigator.push(context, MaterialPageRoute(builder: (context) => PdfViewPage(pdf: selectedCategory!.files[itemIndex])));
+                              },
+                            ),
+                            TextButton(
+                              child: const Text('Share'),
+                              onPressed: () {
+                                Share.shareXFiles([XFile(selectedCategory!.files[itemIndex].path)], text: selectedCategory!.files[itemIndex].name);
                               },
                             ),
                           ],
